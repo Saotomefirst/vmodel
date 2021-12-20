@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import com.saotome.vmodel.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -13,7 +15,8 @@ class MainActivity : AppCompatActivity() {
     lateinit var btnDados: Button
     lateinit var btnMostrar: Button
 
-    var contador = 0
+    lateinit var mainViewModel: MainViewModel
+
 
     private lateinit var activityMainBinding: ActivityMainBinding
 
@@ -22,39 +25,34 @@ class MainActivity : AppCompatActivity() {
         activityMainBinding = ActivityMainBinding.inflate(layoutInflater)
         val activityMainview = activityMainBinding.root
         setContentView(activityMainview)
-        //setContentView(R.layout.activity_main)
 
         inicializarDados()
-        inicializarContador()
         inicializarCliques()
 
     }
 
-    private fun validarContador() {
-        if (contador > 5) {
-            contador = 0
-        }
-    }
+
 
     private fun inicializarDados() {
+        mainViewModel = ViewModelProvider(this).get(MainViewModel::class.java)
+
         txtContador = activityMainBinding.txtContador
         btnDados = activityMainBinding.btnDados
         btnMostrar = activityMainBinding.btnMostrar
-    }
 
-    private fun inicializarContador() {
-        txtContador.setText(contador.toString())
+        // sempre que mContador for alterado, isto será executado!
+        mainViewModel.mContador.observe(this, Observer { valor ->
+            txtContador.setText(valor)
+        })
     }
 
     private fun inicializarCliques() {
         btnDados.setOnClickListener {
-            contador++
-            validarContador()
-            inicializarContador()
+            mainViewModel.contador()
         }
 
         btnMostrar.setOnClickListener {
-            Toast.makeText(this, "Valor do Contador: ${contador.toString()}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(applicationContext, "Valor do Contador: ${mainViewModel.mContador.value}", Toast.LENGTH_SHORT).show()
         }
     }
 
